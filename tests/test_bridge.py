@@ -60,11 +60,25 @@ def test_is_bridge_manifest_false_without_marker() -> None:
     assert is_bridge_manifest({}) is False
 
 
-def test_extract_marker_returns_marker_dict() -> None:
-    manifest = {
-        "name": "cc-ios-dev",
-        "x-cc-bridge": {"sourcePlugin": "ios-dev", "source": "x", "sourceKind": "git"},
+def _full_marker(**overrides: object) -> dict[str, object]:
+    """Build a complete bridge marker dict; override any field per test."""
+    base: dict[str, object] = {
+        "sourcePlugin": "ios-dev",
+        "source": "git@host:org/repo.git",
+        "sourceKind": "git",
+        "ref": "main",
+        "commit": "abc123",
+        "marketplace": "luna",
+        "syncedAt": "2026-04-16T00:00:00Z",
+        "tool": "cc-plugin-to-codex/0.1.0",
+        "agents": ["cc_ios_dev_helper"],
     }
+    base.update(overrides)
+    return base
+
+
+def test_extract_marker_returns_marker_dict() -> None:
+    manifest = {"name": "cc-ios-dev", "x-cc-bridge": _full_marker()}
     marker = extract_marker(manifest)
     assert marker is not None
     assert marker["sourcePlugin"] == "ios-dev"
@@ -72,6 +86,39 @@ def test_extract_marker_returns_marker_dict() -> None:
 
 def test_extract_marker_returns_none_without_marker() -> None:
     assert extract_marker({"name": "cc-ios-dev"}) is None
+
+
+def test_extract_marker_returns_none_when_marker_empty() -> None:
+    """A marker dict with no fields is malformed — must not partially succeed."""
+    assert extract_marker({"name": "cc-ios-dev", "x-cc-bridge": {}}) is None
+
+
+def test_extract_marker_returns_none_when_required_field_missing() -> None:
+    """Any missing required TypedDict field makes the whole marker invalid."""
+    for missing in (
+        "sourcePlugin",
+        "source",
+        "sourceKind",
+        "ref",
+        "commit",
+        "marketplace",
+        "syncedAt",
+        "tool",
+        "agents",
+    ):
+        marker = _full_marker()
+        marker.pop(missing)
+        assert (
+            extract_marker({"x-cc-bridge": marker}) is None
+        ), f"extract_marker must reject marker missing {missing!r}"
+
+
+def test_extract_marker_accepts_ref_none() -> None:
+    """ref is typed `str | None`; key must exist but value may be None."""
+    marker = _full_marker(ref=None, sourceKind="local", commit="local")
+    result = extract_marker({"x-cc-bridge": marker})
+    assert result is not None
+    assert result["ref"] is None
 
 
 from cc_plugin_to_codex.bridge import (  # noqa: E402
