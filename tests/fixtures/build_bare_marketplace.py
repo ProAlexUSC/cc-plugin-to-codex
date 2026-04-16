@@ -49,13 +49,19 @@ def main() -> None:
         check=True,
     )
 
-    # Git does not track empty directories, so when this bare repo is
-    # committed into the outer project's git history, `refs/heads/` and
-    # `refs/tags/` would be dropped — and a subsequent `git clone file://`
-    # would refuse the repo ("does not appear to be a git repository").
-    # Touch a placeholder file in each empty dir so they survive the commit.
+    # Minimize the committed fixture: pack every ref into packed-refs,
+    # drop the now-empty refs/heads and refs/tags subdirs, and leave a
+    # single placeholder in refs/ so git still recognizes the bare repo
+    # after the outer git strips empty directories on checkout.
+    subprocess.run(
+        ["git", "-C", str(BARE), "pack-refs", "--all", "--prune"],
+        check=True,
+    )
     for sub in ("refs/heads", "refs/tags"):
-        (BARE / sub / ".gitkeep").touch()
+        sub_dir = BARE / sub
+        if sub_dir.exists():
+            shutil.rmtree(sub_dir)
+    (BARE / "refs" / ".gitkeep").touch()
 
     shutil.rmtree(WORK)
 
