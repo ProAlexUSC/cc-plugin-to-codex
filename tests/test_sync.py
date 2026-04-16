@@ -340,9 +340,9 @@ def test_sync_one_removes_stale_agents_on_resync(fake_home: Path, tmp_path: Path
         scope=scope,
     )
     assert (scope.agents_dir / "cc_demo_keeper.toml").exists()
-    assert not (scope.agents_dir / "cc_demo_doomed.toml").exists(), (
-        "stale bridge agent should be removed on re-sync"
-    )
+    assert not (
+        scope.agents_dir / "cc_demo_doomed.toml"
+    ).exists(), "stale bridge agent should be removed on re-sync"
 
 
 def test_sync_one_preserves_user_authored_toml_during_stale_cleanup(
