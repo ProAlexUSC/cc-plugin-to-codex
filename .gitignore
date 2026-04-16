@@ -38,3 +38,6 @@ Thumbs.db
 # Environments
 .env
 .envrc
+
+# Local planning artifacts (specs, plans from brainstorming sessions)
+docs/superpowers/
