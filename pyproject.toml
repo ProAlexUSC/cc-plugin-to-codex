@@ -59,6 +59,14 @@ include = ["src/cc_plugin_to_codex", "README.md", "LICENSE", "CHANGELOG.md", "py
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+# Pin the index to public PyPI so `uv lock` produces a lockfile that
+# CI and external contributors can resolve. Without this, a local user
+# config pointing at an internal mirror (e.g. bytedpypi) would bake
+# unreachable URLs into uv.lock.
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+default = true
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
