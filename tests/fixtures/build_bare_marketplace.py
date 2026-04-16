@@ -49,6 +49,14 @@ def main() -> None:
         check=True,
     )
 
+    # Git does not track empty directories, so when this bare repo is
+    # committed into the outer project's git history, `refs/heads/` and
+    # `refs/tags/` would be dropped — and a subsequent `git clone file://`
+    # would refuse the repo ("does not appear to be a git repository").
+    # Touch a placeholder file in each empty dir so they survive the commit.
+    for sub in ("refs/heads", "refs/tags"):
+        (BARE / sub / ".gitkeep").touch()
+
     shutil.rmtree(WORK)
 
     print(f"Built {BARE}")
