@@ -60,7 +60,7 @@ def is_bridge_manifest(manifest: dict[str, Any]) -> bool:
 def extract_marker(manifest: dict[str, Any]) -> BridgeMarker | None:
     if not is_bridge_manifest(manifest):
         return None
-    return manifest[MARKER_KEY]  # type: ignore[return-value]
+    return manifest[MARKER_KEY]
 
 
 # ---------------------------------------------------------------------------
@@ -111,4 +111,4 @@ def extract_agent_marker(toml_path: Path) -> AgentMarker | None:
     required = {"sourcePlugin", "sourceAgent", "bridgePlugin", "syncedAt"}
     if not required.issubset(payload.keys()):
         return None
-    return payload  # type: ignore[return-value]
+    return payload
