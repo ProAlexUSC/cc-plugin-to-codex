@@ -159,7 +159,7 @@ def test_sync_plugin_force_overwrites_non_bridge(fake_home: Path) -> None:
 def test_sync_agents_converts_md_to_toml(fake_home: Path) -> None:
     scope = resolve_scope("global")
     scope.ensure_dirs()
-    info, mp = _get_plugin_info("demo-a")
+    info, _mp = _get_plugin_info("demo-a")
     agent_names = sync_agents(
         info=info, bridge_name="cc-demo-a", scope=scope, synced_at="2026-04-14T10:30:00Z"
     )
@@ -178,7 +178,7 @@ def test_sync_agents_refuses_non_bridge_toml(fake_home: Path) -> None:
     (scope.agents_dir / "cc_demo_a_helper.toml").write_text(
         'name = "cc_demo_a_helper"\ndescription = "user"\ndeveloper_instructions = "x"\n'
     )
-    info, mp = _get_plugin_info("demo-a")
+    info, _mp = _get_plugin_info("demo-a")
     with pytest.raises(SyncConflictError, match="non-bridge"):
         sync_agents(info=info, bridge_name="cc-demo-a", scope=scope, synced_at="x")
 

@@ -73,13 +73,17 @@ target-version = "py311"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "PTH"]
 ignore = [
-    "E501",  # line length is enforced by formatter, not linter
+    "E501",    # line length is enforced by formatter, not linter
+    "RUF001",  # ambiguous char in string (× used intentionally in CLI output)
+    "RUF002",  # ambiguous char in docstring
+    "RUF003",  # ambiguous char in comment (en-dash used in comments/docstrings)
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["B", "SIM"]  # tests can use looser style
+"tests/fixtures/build_bare_marketplace.py" = ["PTH"]  # subprocess args want str paths
 
 [tool.ruff.format]
 quote-style = "double"
@@ -90,5 +94,6 @@ python_version = "3.11"
 files = ["src/cc_plugin_to_codex"]
 disallow_untyped_defs = true
 warn_unused_ignores = true
+strict_equality = true
 warn_redundant_casts = true
 ignore_missing_imports = true
