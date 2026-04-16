@@ -38,10 +38,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/fangzzzjjj/cc-plugin-to-codex"
-Repository = "https://github.com/fangzzzjjj/cc-plugin-to-codex"
-Issues = "https://github.com/fangzzzjjj/cc-plugin-to-codex/issues"
-Changelog = "https://github.com/fangzzzjjj/cc-plugin-to-codex/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/ProAlexUSC/cc-plugin-to-codex"
+Repository = "https://github.com/ProAlexUSC/cc-plugin-to-codex"
+Issues = "https://github.com/ProAlexUSC/cc-plugin-to-codex/issues"
+Changelog = "https://github.com/ProAlexUSC/cc-plugin-to-codex/blob/main/CHANGELOG.md"
 
 [project.scripts]
 cc2codex = "cc_plugin_to_codex.cli:app"

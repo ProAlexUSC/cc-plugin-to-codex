@@ -9,7 +9,7 @@ bug reports, doc fixes, test additions, feature work.
 Requires Python 3.11+ and [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/fangzzzjjj/cc-plugin-to-codex
+git clone https://github.com/ProAlexUSC/cc-plugin-to-codex
 cd cc-plugin-to-codex
 uv sync --extra dev
 uv run pre-commit install
@@ -51,6 +51,19 @@ Or just run all hooks:
 uv run pre-commit run --all-files
 ```
 
+## Local smoke test
+
+To verify the published CLI form (`uvx --from .`) works end-to-end against
+the bare-marketplace fixture without touching your real `~/.codex`:
+
+```bash
+./scripts/smoke-local.sh
+```
+
+The script redirects `$HOME` to a throwaway temp dir, runs `plugin-sync`,
+prints the produced bridges + agents, and cleans up. Useful before opening
+a PR that touches CLI/sync code.
+
 ## Codex schema reference
 
 When changing how the tool generates `plugin.json` manifests or agent
@@ -75,7 +88,7 @@ the authoritative source of truth for output format.
 
 The Trusted Publisher must be configured once on PyPI with:
 - Project: `cc-plugin-to-codex`
-- Owner / Repo: `fangzzzjjj/cc-plugin-to-codex`
+- Owner / Repo: `ProAlexUSC/cc-plugin-to-codex`
 - Workflow: `publish.yml`
 - Environment: `pypi`
 

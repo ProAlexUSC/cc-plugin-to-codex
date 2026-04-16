@@ -37,7 +37,7 @@ jobs:
       #   https://pypi.org/manage/account/publishing/
       # with:
       #   PyPI project    : cc-plugin-to-codex
-      #   Owner / Repo    : fangzzzjjj / cc-plugin-to-codex
+      #   Owner / Repo    : ProAlexUSC / cc-plugin-to-codex
       #   Workflow name   : publish.yml
       #   Environment name: pypi
       id-token: write

@@ -1,7 +1,7 @@
 # cc-plugin-to-codex
 
-[![CI](https://github.com/fangzzzjjj/cc-plugin-to-codex/actions/workflows/ci.yml/badge.svg)](https://github.com/fangzzzjjj/cc-plugin-to-codex/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/fangzzzjjj/cc-plugin-to-codex/branch/main/graph/badge.svg)](https://codecov.io/gh/fangzzzjjj/cc-plugin-to-codex)
+[![CI](https://github.com/ProAlexUSC/cc-plugin-to-codex/actions/workflows/ci.yml/badge.svg)](https://github.com/ProAlexUSC/cc-plugin-to-codex/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/ProAlexUSC/cc-plugin-to-codex/branch/main/graph/badge.svg)](https://codecov.io/gh/ProAlexUSC/cc-plugin-to-codex)
 [![PyPI](https://img.shields.io/pypi/v/cc-plugin-to-codex.svg)](https://pypi.org/project/cc-plugin-to-codex/)
 [![Python](https://img.shields.io/pypi/pyversions/cc-plugin-to-codex.svg)](https://pypi.org/project/cc-plugin-to-codex/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -152,7 +152,7 @@ and are kept.
 ## Development
 
 ```bash
-git clone https://github.com/fangzzzjjj/cc-plugin-to-codex
+git clone https://github.com/ProAlexUSC/cc-plugin-to-codex
 cd cc-plugin-to-codex
 uv sync --extra dev
 uv run pytest -v
