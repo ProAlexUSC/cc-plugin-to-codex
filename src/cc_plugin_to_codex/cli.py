@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import typer
 
-from cc_plugin_to_codex import log
+from cc_plugin_to_codex import __version__, log
 from cc_plugin_to_codex.interactive import (
     StrictModeError,
     is_non_interactive,
@@ -35,6 +35,25 @@ app = typer.Typer(
     ),
     no_args_is_help=True,
 )
+
+
+def _version_callback(value: bool) -> None:
+    if value:
+        typer.echo(f"cc2codex {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def _root(
+    _version: bool = typer.Option(
+        False,
+        "--version",
+        callback=_version_callback,
+        is_eager=True,
+        help="Show the installed version and exit.",
+    ),
+) -> None:
+    """Root callback that registers --version before any subcommand runs."""
 
 
 # Shared option descriptions reused across commands for consistent wording.

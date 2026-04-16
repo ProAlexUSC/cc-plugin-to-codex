@@ -36,3 +36,12 @@ def test_browse_missing_source_strict_errors() -> None:
     result = runner.invoke(app, ["plugin-browse", "--non-interactive"])
     assert result.exit_code != 0
     assert "source" in result.stdout.lower() or "source" in (result.stderr or "").lower()
+
+
+def test_cli_version_flag_prints_version() -> None:
+    """`cc2codex --version` prints the installed package version and exits 0."""
+    from cc_plugin_to_codex import __version__
+
+    result = runner.invoke(app, ["--version"])
+    assert result.exit_code == 0
+    assert result.stdout.strip() == f"cc2codex {__version__}"
