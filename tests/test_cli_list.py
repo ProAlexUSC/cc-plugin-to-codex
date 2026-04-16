@@ -1,4 +1,5 @@
 """E2E tests for plugin-list."""
+
 from __future__ import annotations
 
 import json
@@ -16,8 +17,14 @@ def _prepopulate(fake_home: Path) -> None:
     runner.invoke(
         app,
         [
-            "plugin-sync", "--source", str(FIXTURE_DIR), "--scope", "global",
-            "--all-plugins", "--non-interactive", "--yes",
+            "plugin-sync",
+            "--source",
+            str(FIXTURE_DIR),
+            "--scope",
+            "global",
+            "--all-plugins",
+            "--non-interactive",
+            "--yes",
         ],
     )
 

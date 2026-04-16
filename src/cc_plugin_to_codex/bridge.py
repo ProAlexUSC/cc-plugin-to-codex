@@ -1,9 +1,10 @@
 """x-cc-bridge marker: plugin.json and agent TOML detection/creation."""
+
 from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal, TypedDict
 
@@ -38,7 +39,7 @@ def build_marker(
     agents: list[str],
     now: datetime | None = None,
 ) -> BridgeMarker:
-    ts = (now or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ts = (now or datetime.now(UTC)).strftime("%Y-%m-%dT%H:%M:%SZ")
     return BridgeMarker(
         sourcePlugin=source_plugin,
         source=source,
@@ -52,14 +53,37 @@ def build_marker(
     )
 
 
+_REQUIRED_BRIDGE_MARKER_KEYS = {
+    "sourcePlugin",
+    "source",
+    "sourceKind",
+    "ref",
+    "commit",
+    "marketplace",
+    "syncedAt",
+    "tool",
+    "agents",
+}
+
+
 def is_bridge_manifest(manifest: dict[str, Any]) -> bool:
     return MARKER_KEY in manifest and isinstance(manifest[MARKER_KEY], dict)
 
 
 def extract_marker(manifest: dict[str, Any]) -> BridgeMarker | None:
+    """Return the bridge marker only if every required TypedDict field is present.
+
+    Silently returns None for a manifest with an incomplete or malformed marker
+    (e.g. `{"x-cc-bridge": {}}`), so callers can treat "bridge but unparseable"
+    the same as "not a bridge". Matches the stricter validation already done by
+    extract_agent_marker on the agent-TOML side.
+    """
     if not is_bridge_manifest(manifest):
         return None
-    return manifest[MARKER_KEY]  # type: ignore[return-value]
+    payload = manifest[MARKER_KEY]
+    if not _REQUIRED_BRIDGE_MARKER_KEYS.issubset(payload.keys()):
+        return None
+    return payload
 
 
 # ---------------------------------------------------------------------------
@@ -110,4 +134,4 @@ def extract_agent_marker(toml_path: Path) -> AgentMarker | None:
     required = {"sourcePlugin", "sourceAgent", "bridgePlugin", "syncedAt"}
     if not required.issubset(payload.keys()):
         return None
-    return payload  # type: ignore[return-value]
+    return payload

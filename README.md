@@ -1,6 +1,7 @@
 # cc-plugin-to-codex
 
-[![CI](https://github.com/fangzzzjjj/cc-plugin-to-codex/actions/workflows/ci.yml/badge.svg)](https://github.com/fangzzzjjj/cc-plugin-to-codex/actions/workflows/ci.yml)
+[![CI](https://github.com/ProAlexUSC/cc-plugin-to-codex/actions/workflows/ci.yml/badge.svg)](https://github.com/ProAlexUSC/cc-plugin-to-codex/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/ProAlexUSC/cc-plugin-to-codex/branch/main/graph/badge.svg)](https://codecov.io/gh/ProAlexUSC/cc-plugin-to-codex)
 [![PyPI](https://img.shields.io/pypi/v/cc-plugin-to-codex.svg)](https://pypi.org/project/cc-plugin-to-codex/)
 [![Python](https://img.shields.io/pypi/pyversions/cc-plugin-to-codex.svg)](https://pypi.org/project/cc-plugin-to-codex/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -77,6 +78,21 @@ cc2codex --help
 
 Each command supports `--help` for the full flag reference.
 
+## Asking an AI to drive `cc2codex`
+
+A ready-made, agent-optimized skill file lives at
+[`skills/cc2codex/SKILL.md`](https://github.com/ProAlexUSC/cc-plugin-to-codex/blob/main/skills/cc2codex/SKILL.md).
+It is written in the format Claude / Codex agents consume (frontmatter
+trigger + full flag / schema reference / strict-mode rules / pitfalls).
+
+If you want an AI assistant — inside Claude Code, Codex, or any chat
+tool that can read a URL — to operate cc2codex for you, paste the raw
+URL above into the conversation and tell it "read this before you
+run any cc2codex command". The assistant will then know which flags
+are mandatory in non-interactive mode, how the `x-cc-bridge` marker
+semantics work, and the post-install Codex restart step users
+frequently forget.
+
 ## Quick start
 
 Browse a marketplace:
@@ -151,7 +167,7 @@ and are kept.
 ## Development
 
 ```bash
-git clone https://github.com/fangzzzjjj/cc-plugin-to-codex
+git clone https://github.com/ProAlexUSC/cc-plugin-to-codex
 cd cc-plugin-to-codex
 uv sync --extra dev
 uv run pytest -v

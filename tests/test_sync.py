@@ -1,4 +1,5 @@
 """Tests for sync orchestration."""
+
 from __future__ import annotations
 
 import json
@@ -10,7 +11,6 @@ from cc_plugin_to_codex.marketplace import read_source_marketplace
 from cc_plugin_to_codex.scopes import resolve_scope
 from cc_plugin_to_codex.sync import (
     SyncConflictError,
-    SyncResult,
     sync_agents,
     sync_one,
     sync_plugin,
@@ -28,7 +28,7 @@ def test_sync_plugin_translates_claude_manifest(fake_home: Path) -> None:
     scope = resolve_scope("global")
     scope.ensure_dirs()
     info, mp = _get_plugin_info("demo-a")
-    result = sync_plugin(
+    sync_plugin(
         info=info,
         marketplace_name=mp.name,
         source="/fake/src",
@@ -62,7 +62,9 @@ def test_sync_plugin_copies_existing_codex_manifest(fake_home: Path) -> None:
         commit="local",
         scope=scope,
     )
-    manifest = json.loads((scope.plugins_dir / "cc-demo-b" / ".codex-plugin" / "plugin.json").read_text())
+    manifest = json.loads(
+        (scope.plugins_dir / "cc-demo-b" / ".codex-plugin" / "plugin.json").read_text()
+    )
     # demo-b's codex manifest had description "Demo plugin B (codex variant)"
     assert manifest["description"] == "Demo plugin B (codex variant)"
 
@@ -93,14 +95,24 @@ def test_sync_plugin_refuses_different_source(fake_home: Path) -> None:
     # first sync from source-A
     info, mp = _get_plugin_info("demo-a")
     sync_plugin(
-        info=info, marketplace_name=mp.name, source="source-A",
-        source_kind="local", ref=None, commit="local", scope=scope,
+        info=info,
+        marketplace_name=mp.name,
+        source="source-A",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
     )
     # second sync from source-B should fail
     with pytest.raises(SyncConflictError, match="different source"):
         sync_plugin(
-            info=info, marketplace_name=mp.name, source="source-B",
-            source_kind="local", ref=None, commit="local", scope=scope,
+            info=info,
+            marketplace_name=mp.name,
+            source="source-B",
+            source_kind="local",
+            ref=None,
+            commit="local",
+            scope=scope,
         )
 
 
@@ -110,8 +122,13 @@ def test_sync_plugin_allows_resync_from_same_source(fake_home: Path) -> None:
     info, mp = _get_plugin_info("demo-a")
     for _ in range(2):
         sync_plugin(
-            info=info, marketplace_name=mp.name, source="same",
-            source_kind="local", ref=None, commit="local", scope=scope,
+            info=info,
+            marketplace_name=mp.name,
+            source="same",
+            source_kind="local",
+            ref=None,
+            commit="local",
+            scope=scope,
         )
     # still only one bridge dir
     assert (scope.plugins_dir / "cc-demo-a" / ".codex-plugin" / "plugin.json").exists()
@@ -126,8 +143,14 @@ def test_sync_plugin_force_overwrites_non_bridge(fake_home: Path) -> None:
 
     info, mp = _get_plugin_info("demo-a")
     sync_plugin(
-        info=info, marketplace_name=mp.name, source="s",
-        source_kind="local", ref=None, commit="local", scope=scope, force=True,
+        info=info,
+        marketplace_name=mp.name,
+        source="s",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
+        force=True,
     )
     manifest = json.loads((bridge_dir / ".codex-plugin" / "plugin.json").read_text())
     assert "x-cc-bridge" in manifest
@@ -136,8 +159,10 @@ def test_sync_plugin_force_overwrites_non_bridge(fake_home: Path) -> None:
 def test_sync_agents_converts_md_to_toml(fake_home: Path) -> None:
     scope = resolve_scope("global")
     scope.ensure_dirs()
-    info, mp = _get_plugin_info("demo-a")
-    agent_names = sync_agents(info=info, bridge_name="cc-demo-a", scope=scope, synced_at="2026-04-14T10:30:00Z")
+    info, _mp = _get_plugin_info("demo-a")
+    agent_names = sync_agents(
+        info=info, bridge_name="cc-demo-a", scope=scope, synced_at="2026-04-14T10:30:00Z"
+    )
     assert agent_names == ["cc_demo_a_helper"]
     toml_path = scope.agents_dir / "cc_demo_a_helper.toml"
     assert toml_path.exists()
@@ -153,7 +178,7 @@ def test_sync_agents_refuses_non_bridge_toml(fake_home: Path) -> None:
     (scope.agents_dir / "cc_demo_a_helper.toml").write_text(
         'name = "cc_demo_a_helper"\ndescription = "user"\ndeveloper_instructions = "x"\n'
     )
-    info, mp = _get_plugin_info("demo-a")
+    info, _mp = _get_plugin_info("demo-a")
     with pytest.raises(SyncConflictError, match="non-bridge"):
         sync_agents(info=info, bridge_name="cc-demo-a", scope=scope, synced_at="x")
 
@@ -163,8 +188,13 @@ def test_sync_one_full_orchestrate_updates_manifest_agents_field(fake_home: Path
     scope.ensure_dirs()
     info, mp = _get_plugin_info("demo-a")
     result = sync_one(
-        info=info, marketplace_name=mp.name, source="s",
-        source_kind="local", ref=None, commit="local", scope=scope,
+        info=info,
+        marketplace_name=mp.name,
+        source="s",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
     )
     assert result.agents == ["cc_demo_a_helper"]
     manifest = json.loads(result.manifest_path.read_text())
@@ -176,17 +206,20 @@ def test_sync_one_registry_is_upserted(fake_home: Path) -> None:
     scope.ensure_dirs()
     info, mp = _get_plugin_info("demo-a")
     sync_one(
-        info=info, marketplace_name=mp.name, source="s",
-        source_kind="local", ref=None, commit="local", scope=scope,
+        info=info,
+        marketplace_name=mp.name,
+        source="s",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
     )
     reg = json.loads(scope.registry.read_text())
     names = [p["name"] for p in reg["plugins"]]
     assert "cc-demo-a" in names
 
 
-def test_sync_plugin_copies_arbitrary_top_level_dirs(
-    fake_home: Path, tmp_path: Path
-) -> None:
+def test_sync_plugin_copies_arbitrary_top_level_dirs(fake_home: Path, tmp_path: Path) -> None:
     """Any non-CC-only top-level entry (scripts/, CLAUDE.md, luna-rules/, ...)
     must survive the copy so skill helpers stay reachable."""
     from cc_plugin_to_codex.marketplace import read_source_marketplace
@@ -194,10 +227,14 @@ def test_sync_plugin_copies_arbitrary_top_level_dirs(
     src = tmp_path / "src_mk"
     (src / ".claude-plugin").mkdir(parents=True)
     (src / ".claude-plugin" / "marketplace.json").write_text(
-        json.dumps({
-            "name": "mk",
-            "plugins": [{"name": "demo", "source": {"source": "local", "path": "./plugins/demo"}}],
-        })
+        json.dumps(
+            {
+                "name": "mk",
+                "plugins": [
+                    {"name": "demo", "source": {"source": "local", "path": "./plugins/demo"}}
+                ],
+            }
+        )
     )
     plugin_dir = src / "plugins" / "demo"
     (plugin_dir / ".claude-plugin").mkdir(parents=True)
@@ -224,8 +261,13 @@ def test_sync_plugin_copies_arbitrary_top_level_dirs(
     scope = resolve_scope("global")
     scope.ensure_dirs()
     sync_plugin(
-        info=info, marketplace_name=mp.name, source="s",
-        source_kind="local", ref=None, commit="local", scope=scope,
+        info=info,
+        marketplace_name=mp.name,
+        source="s",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
     )
 
     bridge = scope.plugins_dir / "cc-demo"
@@ -245,10 +287,14 @@ def test_sync_one_removes_stale_agents_on_resync(fake_home: Path, tmp_path: Path
     src = tmp_path / "src_mk"
     (src / ".claude-plugin").mkdir(parents=True)
     (src / ".claude-plugin" / "marketplace.json").write_text(
-        json.dumps({
-            "name": "test-mk",
-            "plugins": [{"name": "demo", "source": {"source": "local", "path": "./plugins/demo"}}],
-        })
+        json.dumps(
+            {
+                "name": "test-mk",
+                "plugins": [
+                    {"name": "demo", "source": {"source": "local", "path": "./plugins/demo"}}
+                ],
+            }
+        )
     )
     plugin_dir = src / "plugins" / "demo"
     (plugin_dir / ".claude-plugin").mkdir(parents=True)
@@ -269,8 +315,13 @@ def test_sync_one_removes_stale_agents_on_resync(fake_home: Path, tmp_path: Path
     mp1 = read_source_marketplace(src)
     info1 = mp1.plugins[0]
     sync_one(
-        info=info1, marketplace_name=mp1.name, source="x",
-        source_kind="local", ref=None, commit="local", scope=scope,
+        info=info1,
+        marketplace_name=mp1.name,
+        source="x",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
     )
     assert (scope.agents_dir / "cc_demo_keeper.toml").exists()
     assert (scope.agents_dir / "cc_demo_doomed.toml").exists()
@@ -280,12 +331,18 @@ def test_sync_one_removes_stale_agents_on_resync(fake_home: Path, tmp_path: Path
     mp2 = read_source_marketplace(src)
     info2 = mp2.plugins[0]
     sync_one(
-        info=info2, marketplace_name=mp2.name, source="x",
-        source_kind="local", ref=None, commit="local", scope=scope,
+        info=info2,
+        marketplace_name=mp2.name,
+        source="x",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
     )
     assert (scope.agents_dir / "cc_demo_keeper.toml").exists()
-    assert not (scope.agents_dir / "cc_demo_doomed.toml").exists(), \
+    assert not (scope.agents_dir / "cc_demo_doomed.toml").exists(), (
         "stale bridge agent should be removed on re-sync"
+    )
 
 
 def test_sync_one_preserves_user_authored_toml_during_stale_cleanup(
@@ -298,16 +355,19 @@ def test_sync_one_preserves_user_authored_toml_during_stale_cleanup(
 
     # First sync creates cc_demo_a_helper.toml
     sync_one(
-        info=info, marketplace_name=mp.name, source="s",
-        source_kind="local", ref=None, commit="local", scope=scope,
+        info=info,
+        marketplace_name=mp.name,
+        source="s",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
     )
 
     # User writes their own TOML with a name that's NOT in the new marker
     user_toml = scope.agents_dir / "cc_demo_a_orphan.toml"
     user_toml.write_text(
-        'name = "cc_demo_a_orphan"\n'
-        'description = "user-owned"\n'
-        'developer_instructions = "x"\n'
+        'name = "cc_demo_a_orphan"\ndescription = "user-owned"\ndeveloper_instructions = "x"\n'
     )
 
     # Manually tamper with the manifest to pretend "orphan" was bridged last time
@@ -318,7 +378,73 @@ def test_sync_one_preserves_user_authored_toml_during_stale_cleanup(
 
     # Re-sync: even though marker says orphan is bridged, TOML has no bridge marker → keep
     sync_one(
-        info=info, marketplace_name=mp.name, source="s",
-        source_kind="local", ref=None, commit="local", scope=scope,
+        info=info,
+        marketplace_name=mp.name,
+        source="s",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
     )
     assert user_toml.exists(), "user-authored TOML must never be deleted by stale cleanup"
+
+
+def test_atomic_replace_rollback_on_rename_failure(fake_home: Path, monkeypatch) -> None:
+    """If staged.rename(target) fails after the old dir was moved aside,
+    the rollback must restore the original target and stage_dir is removed."""
+    scope = resolve_scope("global")
+    scope.ensure_dirs()
+    info, mp = _get_plugin_info("demo-a")
+
+    # First sync to populate target
+    sync_plugin(
+        info=info,
+        marketplace_name=mp.name,
+        source="s",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
+    )
+    bridge_dir = scope.plugins_dir / "cc-demo-a"
+    original_manifest_text = (bridge_dir / ".codex-plugin" / "plugin.json").read_text()
+
+    # Patch Path.rename so the SECOND call (staged.rename(target)) fails.
+    # First call (target -> old_dir) succeeds; second call raises.
+    real_rename = Path.rename
+    state = {"calls": 0}
+
+    def _flaky_rename(self, target):
+        state["calls"] += 1
+        if state["calls"] == 2:
+            raise OSError("simulated rename failure")
+        return real_rename(self, target)
+
+    monkeypatch.setattr(Path, "rename", _flaky_rename)
+
+    with pytest.raises(OSError, match="simulated rename failure"):
+        sync_plugin(
+            info=info,
+            marketplace_name=mp.name,
+            source="s",
+            source_kind="local",
+            ref=None,
+            commit="local",
+            scope=scope,
+        )
+
+    # Restore real rename so post-checks work
+    monkeypatch.setattr(Path, "rename", real_rename)
+
+    # Original target must be restored by the rollback
+    assert bridge_dir.exists(), "original bridge dir must be restored after failed rename"
+    restored_text = (bridge_dir / ".codex-plugin" / "plugin.json").read_text()
+    assert restored_text == original_manifest_text
+
+    # No leftover stage- or .old- dirs in the parent
+    siblings = [
+        p
+        for p in scope.plugins_dir.iterdir()
+        if p.name.startswith(".cc-demo-a.stage-") or p.name.startswith(".cc-demo-a.old-")
+    ]
+    assert siblings == [], f"orphan dirs left behind: {siblings}"

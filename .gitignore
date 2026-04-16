@@ -12,9 +12,6 @@ dist/
 build/
 wheels/
 
-# uv
-uv.lock
-
 # Testing
 .pytest_cache/
 .tox/
@@ -38,3 +35,6 @@ Thumbs.db
 # Environments
 .env
 .envrc
+
+# Local planning artifacts (specs, plans from brainstorming sessions)
+docs/superpowers/

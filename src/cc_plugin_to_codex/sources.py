@@ -1,4 +1,5 @@
 """Source resolution: Git URL, local path, scan local marketplaces."""
+
 from __future__ import annotations
 
 import re
@@ -12,7 +13,12 @@ from typing import Literal
 
 SourceKind = Literal["git", "local"]
 
-GIT_URL_RE = re.compile(r"^(git@|https?://|ssh://|git://).+\.git$|^git@.+:.+$")
+# Git URL matching. Network schemes (git@, https, ssh, git) require the .git
+# suffix — real remotes always carry it and anything without is more likely a
+# typo. The file:// scheme is relaxed: local git repos frequently live in plain
+# directories without a .git suffix (e.g. file:///path/to/checkout), and the
+# file:// prefix is already strong evidence the user means "treat as git".
+GIT_URL_RE = re.compile(r"^(git@|https?://|ssh://|git://).+\.git/?$|^git@.+:.+$|^file://.+")
 # A plausible git SHA: 7–40 hex chars, all lowercase (git rev-parse output convention).
 GIT_SHA_RE = re.compile(r"^[0-9a-f]{7,40}$")
 
@@ -60,9 +66,16 @@ def resolve_git(
 
     try:
         if GIT_SHA_RE.match(ref):
-            _run_git(["git", "clone", "--filter=blob:none", "--no-checkout", url, str(tmp_dir)], timeout=timeout)
-            _run_git(["git", "-C", str(tmp_dir), "fetch", "--depth=1", "origin", ref], timeout=timeout)
-            _run_git(["git", "-C", str(tmp_dir), "checkout", ref], timeout=GIT_QUICK_TIMEOUT_SECONDS)
+            _run_git(
+                ["git", "clone", "--filter=blob:none", "--no-checkout", url, str(tmp_dir)],
+                timeout=timeout,
+            )
+            _run_git(
+                ["git", "-C", str(tmp_dir), "fetch", "--depth=1", "origin", ref], timeout=timeout
+            )
+            _run_git(
+                ["git", "-C", str(tmp_dir), "checkout", ref], timeout=GIT_QUICK_TIMEOUT_SECONDS
+            )
         else:
             _run_git(
                 ["git", "clone", "--depth=1", "--branch", ref, url, str(tmp_dir)],
@@ -90,8 +103,8 @@ def _run_git(cmd: list[str], *, timeout: int) -> str:
     """Run a git command with a bounded timeout. Raise RuntimeError on failure."""
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-    except subprocess.TimeoutExpired:
-        raise RuntimeError(f"git command timed out after {timeout}s: {' '.join(cmd)}")
+    except subprocess.TimeoutExpired as e:
+        raise RuntimeError(f"git command timed out after {timeout}s: {' '.join(cmd)}") from e
     if result.returncode != 0:
         stderr = (result.stderr or "").strip()
         raise RuntimeError(f"git failed ({' '.join(cmd)}): {stderr}")

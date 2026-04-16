@@ -1,0 +1,78 @@
+"""Build (or rebuild) tests/fixtures/bare-marketplace.git from src_marketplace/.
+
+Run this whenever src_marketplace/ changes. The bare repo is committed to
+the repo so the e2e test does not require running this script in CI.
+
+Usage:
+    python tests/fixtures/build_bare_marketplace.py
+"""
+
+from __future__ import annotations
+
+import shutil
+import subprocess
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+SRC = HERE / "src_marketplace"
+BARE = HERE / "bare-marketplace.git"
+WORK = HERE / "_bare_workdir"
+
+
+def main() -> None:
+    if not SRC.is_dir():
+        raise SystemExit(f"missing source: {SRC}")
+
+    if BARE.exists():
+        shutil.rmtree(BARE)
+    if WORK.exists():
+        shutil.rmtree(WORK)
+
+    shutil.copytree(SRC, WORK)
+    subprocess.run(["git", "init", "--initial-branch=main", str(WORK)], check=True)
+    subprocess.run(
+        ["git", "-C", str(WORK), "config", "user.email", "fixture@example.com"],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(WORK), "config", "user.name", "Fixture Builder"],
+        check=True,
+    )
+    subprocess.run(["git", "-C", str(WORK), "add", "."], check=True)
+    subprocess.run(
+        ["git", "-C", str(WORK), "commit", "-m", "fixture: initial marketplace snapshot"],
+        check=True,
+    )
+
+    subprocess.run(
+        ["git", "clone", "--bare", str(WORK), str(BARE)],
+        check=True,
+    )
+
+    # git clone --bare writes the source path into [remote "origin"].url;
+    # that path is both meaningless (the workdir gets rmtree'd) and leaks
+    # the build machine's filesystem layout into a committed fixture.
+    # Remove the remote so the bare repo is self-contained.
+    subprocess.run(
+        ["git", "-C", str(BARE), "remote", "remove", "origin"],
+        check=True,
+    )
+
+    # The outer git strips empty directories on checkout, so drop the
+    # unpacked refs/heads and refs/tags subdirs (packed-refs already
+    # carries every ref) and leave a single refs/.gitkeep so the bare
+    # repo is still recognizable after the fixture lands in a fresh
+    # clone of the outer project.
+    for sub in ("refs/heads", "refs/tags"):
+        sub_dir = BARE / sub
+        if sub_dir.exists():
+            shutil.rmtree(sub_dir)
+    (BARE / "refs" / ".gitkeep").touch()
+
+    shutil.rmtree(WORK)
+
+    print(f"Built {BARE}")
+
+
+if __name__ == "__main__":
+    main()

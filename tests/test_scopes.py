@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cc_plugin_to_codex.scopes import Scope, resolve_scope
+from cc_plugin_to_codex.scopes import resolve_scope
 
 
 def test_resolve_global(fake_home: Path) -> None:
