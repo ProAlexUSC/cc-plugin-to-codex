@@ -1,4 +1,5 @@
 """Read source marketplace.json and extract plugin metadata."""
+
 from __future__ import annotations
 
 import json
@@ -71,6 +72,8 @@ def _read_plugin_info(plugin_dir: Path, declared_name: str) -> PluginInfo:
         description=manifest.get("description", ""),
         plugin_dir=plugin_dir,
         has_codex_manifest=codex_manifest.exists(),
-        skill_count=sum(1 for p in skills_dir.iterdir() if p.is_dir()) if skills_dir.is_dir() else 0,
+        skill_count=sum(1 for p in skills_dir.iterdir() if p.is_dir())
+        if skills_dir.is_dir()
+        else 0,
         agent_count=sum(1 for p in agents_dir.glob("*.md")) if agents_dir.is_dir() else 0,
     )

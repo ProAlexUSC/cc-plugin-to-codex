@@ -1,4 +1,5 @@
 """E2E tests for plugin-browse."""
+
 from __future__ import annotations
 
 import json
@@ -13,7 +14,9 @@ FIXTURE_DIR = Path(__file__).parent / "fixtures" / "src_marketplace"
 
 
 def test_browse_local_source_text() -> None:
-    result = runner.invoke(app, ["plugin-browse", "--source", str(FIXTURE_DIR), "--non-interactive"])
+    result = runner.invoke(
+        app, ["plugin-browse", "--source", str(FIXTURE_DIR), "--non-interactive"]
+    )
     assert result.exit_code == 0, result.stdout
     assert "demo-a" in result.stdout
     assert "demo-b" in result.stdout

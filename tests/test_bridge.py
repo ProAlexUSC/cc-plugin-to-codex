@@ -1,13 +1,11 @@
 """Tests for x-cc-bridge marker handling."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
-import pytest
-
 from cc_plugin_to_codex.bridge import (
-    BridgeMarker,
     build_marker,
     extract_marker,
     is_bridge_manifest,
@@ -92,6 +90,7 @@ def test_build_agent_marker_line_is_valid_toml_comment() -> None:
     assert line.startswith("# x-cc-bridge: ")
     # comment payload is valid JSON
     import json
+
     payload = json.loads(line.removeprefix("# x-cc-bridge: "))
     assert payload["sourcePlugin"] == "ios-dev"
     assert payload["sourceAgent"] == "helper"
@@ -115,7 +114,9 @@ def test_extract_agent_marker_from_toml_first_line(tmp_path: Path) -> None:
 
 def test_extract_agent_marker_none_when_no_comment(tmp_path: Path) -> None:
     toml_file = tmp_path / "user_authored.toml"
-    toml_file.write_text('name = "user_authored"\ndescription = "d"\ndeveloper_instructions = "i"\n')
+    toml_file.write_text(
+        'name = "user_authored"\ndescription = "d"\ndeveloper_instructions = "i"\n'
+    )
     assert extract_agent_marker(toml_file) is None
 
 

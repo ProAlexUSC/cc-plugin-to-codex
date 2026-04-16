@@ -1,11 +1,13 @@
 """Sync orchestration: copy plugin body + convert subagents."""
+
 from __future__ import annotations
 
+import contextlib
 import json
 import shutil
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
@@ -39,7 +41,13 @@ _CC_ONLY_DIR_NAMES = {".claude-plugin", ".codex-plugin", "hooks", "commands", "a
 
 # Noise that gets picked up during blacklist copy if not filtered out.
 _COPY_IGNORE_PATTERNS = (
-    "__pycache__", "*.pyc", ".DS_Store", ".git", ".pytest_cache", ".venv", "node_modules",
+    "__pycache__",
+    "*.pyc",
+    ".DS_Store",
+    ".git",
+    ".pytest_cache",
+    ".venv",
+    "node_modules",
 )
 
 
@@ -147,10 +155,8 @@ def _atomic_replace(target: Path, staged: Path) -> None:
         try:
             staged.rename(target)
         except Exception:
-            try:
+            with contextlib.suppress(Exception):
                 old_dir.rename(target)  # rollback
-            except Exception:
-                pass
             raise
         shutil.rmtree(old_dir, ignore_errors=True)
     else:
@@ -176,7 +182,9 @@ def _check_conflict(manifest_path: Path, *, source: str, force: bool) -> None:
     if manifest is None:
         if force:
             return
-        raise SyncConflictError(f"{manifest_path} exists but is unreadable (use --force to overwrite)")
+        raise SyncConflictError(
+            f"{manifest_path} exists but is unreadable (use --force to overwrite)"
+        )
     if not is_bridge_manifest(manifest):
         if force:
             return
@@ -190,7 +198,7 @@ def _check_conflict(manifest_path: Path, *, source: str, force: bool) -> None:
         raise SyncConflictError(
             f"{manifest_path.parent} already synced from different source "
             f"({marker['source']!r} vs {source!r}). "
-            f"Run 'cc2codex plugin-uninstall {marker.get('sourcePlugin','?')}' first, "
+            f"Run 'cc2codex plugin-uninstall {marker.get('sourcePlugin', '?')}' first, "
             f"or pass --force."
         )
 
@@ -204,7 +212,9 @@ def _load_codex_or_claude_manifest(plugin_dir: Path) -> dict:
     if claude.exists():
         with claude.open("r", encoding="utf-8") as f:
             return json.load(f)
-    raise FileNotFoundError(f"neither .codex-plugin/ nor .claude-plugin/ plugin.json under {plugin_dir}")
+    raise FileNotFoundError(
+        f"neither .codex-plugin/ nor .claude-plugin/ plugin.json under {plugin_dir}"
+    )
 
 
 def sync_agents(
@@ -240,7 +250,7 @@ def sync_one(
     force: bool = False,
 ) -> SyncResult:
     """Full sync: stage plugin dir, write agent TOMLs, cleanup stale, update registry."""
-    synced_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    synced_at = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     bridge_name = f"cc-{info.name}"
 
     # Snapshot prior agent list for stale cleanup

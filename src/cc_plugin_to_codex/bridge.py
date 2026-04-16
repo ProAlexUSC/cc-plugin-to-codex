@@ -1,9 +1,10 @@
 """x-cc-bridge marker: plugin.json and agent TOML detection/creation."""
+
 from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal, TypedDict
 
@@ -38,7 +39,7 @@ def build_marker(
     agents: list[str],
     now: datetime | None = None,
 ) -> BridgeMarker:
-    ts = (now or datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ts = (now or datetime.now(UTC)).strftime("%Y-%m-%dT%H:%M:%SZ")
     return BridgeMarker(
         sourcePlugin=source_plugin,
         source=source,

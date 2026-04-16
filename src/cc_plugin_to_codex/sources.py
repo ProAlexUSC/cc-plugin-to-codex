@@ -1,4 +1,5 @@
 """Source resolution: Git URL, local path, scan local marketplaces."""
+
 from __future__ import annotations
 
 import re
@@ -60,9 +61,16 @@ def resolve_git(
 
     try:
         if GIT_SHA_RE.match(ref):
-            _run_git(["git", "clone", "--filter=blob:none", "--no-checkout", url, str(tmp_dir)], timeout=timeout)
-            _run_git(["git", "-C", str(tmp_dir), "fetch", "--depth=1", "origin", ref], timeout=timeout)
-            _run_git(["git", "-C", str(tmp_dir), "checkout", ref], timeout=GIT_QUICK_TIMEOUT_SECONDS)
+            _run_git(
+                ["git", "clone", "--filter=blob:none", "--no-checkout", url, str(tmp_dir)],
+                timeout=timeout,
+            )
+            _run_git(
+                ["git", "-C", str(tmp_dir), "fetch", "--depth=1", "origin", ref], timeout=timeout
+            )
+            _run_git(
+                ["git", "-C", str(tmp_dir), "checkout", ref], timeout=GIT_QUICK_TIMEOUT_SECONDS
+            )
         else:
             _run_git(
                 ["git", "clone", "--depth=1", "--branch", ref, url, str(tmp_dir)],
@@ -90,8 +98,8 @@ def _run_git(cmd: list[str], *, timeout: int) -> str:
     """Run a git command with a bounded timeout. Raise RuntimeError on failure."""
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-    except subprocess.TimeoutExpired:
-        raise RuntimeError(f"git command timed out after {timeout}s: {' '.join(cmd)}")
+    except subprocess.TimeoutExpired as e:
+        raise RuntimeError(f"git command timed out after {timeout}s: {' '.join(cmd)}") from e
     if result.returncode != 0:
         stderr = (result.stderr or "").strip()
         raise RuntimeError(f"git failed ({' '.join(cmd)}): {stderr}")

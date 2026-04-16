@@ -1,4 +1,5 @@
 """E2E tests for plugin-update and plugin-uninstall."""
+
 from __future__ import annotations
 
 import json
@@ -16,8 +17,14 @@ def _prepopulate(fake_home: Path) -> None:
     runner.invoke(
         app,
         [
-            "plugin-sync", "--source", str(FIXTURE_DIR), "--scope", "global",
-            "--all-plugins", "--non-interactive", "--yes",
+            "plugin-sync",
+            "--source",
+            str(FIXTURE_DIR),
+            "--scope",
+            "global",
+            "--all-plugins",
+            "--non-interactive",
+            "--yes",
         ],
     )
 
@@ -44,9 +51,7 @@ def test_update_no_args_strict_hints_at_syntax(fake_home: Path) -> None:
 
 def test_uninstall_removes_bridge_agents_and_registry(fake_home: Path) -> None:
     _prepopulate(fake_home)
-    result = runner.invoke(
-        app, ["plugin-uninstall", "cc-demo-a", "--non-interactive", "--yes"]
-    )
+    result = runner.invoke(app, ["plugin-uninstall", "cc-demo-a", "--non-interactive", "--yes"])
     assert result.exit_code == 0, result.stdout + (result.stderr or "")
     assert not (fake_home / ".codex" / "plugins" / "cc-demo-a").exists()
     assert not (fake_home / ".codex" / "agents" / "cc_demo_a_helper.toml").exists()
@@ -77,9 +82,7 @@ def test_uninstall_unknown_bridge_errors(fake_home: Path) -> None:
 
 def test_uninstall_no_bridges_installed_errors(fake_home: Path) -> None:
     # no _prepopulate => no bridges installed
-    result = runner.invoke(
-        app, ["plugin-uninstall", "--all", "--non-interactive", "--yes"]
-    )
+    result = runner.invoke(app, ["plugin-uninstall", "--all", "--non-interactive", "--yes"])
     assert result.exit_code != 0
     combined = result.stdout + (result.stderr or "")
     assert "no bridge plugins installed" in combined
@@ -87,9 +90,7 @@ def test_uninstall_no_bridges_installed_errors(fake_home: Path) -> None:
 
 def test_update_unknown_bridge_errors(fake_home: Path) -> None:
     _prepopulate(fake_home)
-    result = runner.invoke(
-        app, ["plugin-update", "cc-nope", "--non-interactive", "--yes"]
-    )
+    result = runner.invoke(app, ["plugin-update", "cc-nope", "--non-interactive", "--yes"])
     assert result.exit_code != 0
     combined = result.stdout + (result.stderr or "")
     assert "cc-nope" in combined
@@ -105,6 +106,8 @@ def test_update_resyncs_from_recorded_source(fake_home: Path) -> None:
     assert result.exit_code == 0, result.stdout + (result.stderr or "")
     # bridge still exists
     manifest = json.loads(
-        (fake_home / ".codex" / "plugins" / "cc-demo-a" / ".codex-plugin" / "plugin.json").read_text()
+        (
+            fake_home / ".codex" / "plugins" / "cc-demo-a" / ".codex-plugin" / "plugin.json"
+        ).read_text()
     )
     assert manifest["x-cc-bridge"]["sourcePlugin"] == "demo-a"

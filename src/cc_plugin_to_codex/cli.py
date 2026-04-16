@@ -1,4 +1,5 @@
 """Typer CLI entry point."""
+
 from __future__ import annotations
 
 import typer
@@ -55,9 +56,7 @@ _HELP_SCOPE_GP = (
     "In a TTY, omitting this opens a picker; in non-interactive/strict mode "
     "it must be passed explicitly or the command errors out."
 )
-_HELP_SCOPE_ALL = (
-    "Scope to act on. 'global' = ~/.codex, 'project' = $PWD/.codex, 'all' = both."
-)
+_HELP_SCOPE_ALL = "Scope to act on. 'global' = ~/.codex, 'project' = $PWD/.codex, 'all' = both."
 _HELP_PLUGIN = (
     "Plugin name to sync; repeatable (e.g. --plugin ios-dev --plugin base). "
     "Use the source plugin's original name, without the cc- prefix. "
@@ -83,6 +82,11 @@ _HELP_JSON = (
     "Implies --non-interactive."
 )
 
+# Module-level singletons for typer.Option defaults that would otherwise trigger
+# ruff B008 (function call in argument default). Typer's contract allows these to
+# be shared across commands.
+_PLUGIN_OPTION = typer.Option([], "--plugin", help=_HELP_PLUGIN)
+
 
 @app.command("plugin-browse")
 def plugin_browse(
@@ -107,7 +111,7 @@ def plugin_browse(
         src_val = prompt_source_kind(source=source, strict=strict)
     except StrictModeError as e:
         log.error(str(e))
-        raise typer.Exit(code=2)
+        raise typer.Exit(code=2) from e
     resolved = resolve_source(src_val, ref=ref)
     try:
         mp = read_source_marketplace(resolved.root)
@@ -135,7 +139,9 @@ def plugin_browse(
                 }
             )
         else:
-            log.info(f"[bold]Marketplace:[/bold] {mp.name} ({resolved.source} @ {resolved.ref or 'local'})")
+            log.info(
+                f"[bold]Marketplace:[/bold] {mp.name} ({resolved.source} @ {resolved.ref or 'local'})"
+            )
             log.info("")
             for p in mp.plugins:
                 log.info(
@@ -153,7 +159,7 @@ def plugin_sync(
     source: str | None = typer.Option(None, "--source", help=_HELP_SOURCE),
     ref: str = typer.Option("master", "--ref", help=_HELP_REF),
     scope: str | None = typer.Option(None, "--scope", help=_HELP_SCOPE_GP),
-    plugin: list[str] = typer.Option([], "--plugin", help=_HELP_PLUGIN),
+    plugin: list[str] = _PLUGIN_OPTION,
     all_plugins: bool = typer.Option(False, "--all-plugins", help=_HELP_ALL_PLUGINS),
     yes: bool = typer.Option(False, "--yes", help=_HELP_YES),
     non_interactive: bool = typer.Option(False, "--non-interactive", help=_HELP_NON_INTERACTIVE),
@@ -195,7 +201,7 @@ def plugin_sync(
         src_val = prompt_source_kind(source=source, strict=strict)
     except StrictModeError as e:
         log.error(str(e))
-        raise typer.Exit(code=2)
+        raise typer.Exit(code=2) from e
 
     resolved = resolve_source(src_val, ref=ref)
     try:
@@ -209,13 +215,13 @@ def plugin_sync(
             )
         except StrictModeError as e:
             log.error(str(e))
-            raise typer.Exit(code=2)
+            raise typer.Exit(code=2) from e
 
         try:
             resolved_scope = resolve_scope(prompt_scope(scope=scope, strict=strict))
         except StrictModeError as e:
             log.error(str(e))
-            raise typer.Exit(code=2)
+            raise typer.Exit(code=2) from e
         resolved_scope.ensure_dirs()
 
         info_by_name = {p.name: p for p in mp.plugins}
@@ -235,7 +241,7 @@ def plugin_sync(
                 )
             except SyncConflictError as e:
                 log.error(str(e))
-                raise typer.Exit(code=1)
+                raise typer.Exit(code=1) from e
             synced_items.append(
                 {
                     "bridgeName": result.bridge_name,
@@ -326,7 +332,7 @@ def plugin_uninstall(
         False,
         "--all",
         help="Uninstall every bridge plugin in the target scope. Requires confirmation "
-             "unless --yes is passed.",
+        "unless --yes is passed.",
     ),
     scope: str = typer.Option("all", "--scope", help=_HELP_SCOPE_ALL),
     yes: bool = typer.Option(False, "--yes", help=_HELP_YES),
@@ -372,7 +378,7 @@ def plugin_uninstall(
             picked = prompt_select_bridges(available=available, strict=strict, action="uninstall")
         except StrictModeError as e:
             log.error(str(e))
-            raise typer.Exit(code=2)
+            raise typer.Exit(code=2) from e
         picked_set = set(picked)
         for s, bridges in scope_bridges:
             for b in bridges:
@@ -392,7 +398,7 @@ def plugin_uninstall(
             info = uninstall_bridge(bridge_name=bridge_name, scope=s)
         except (FileNotFoundError, ValueError) as e:
             log.error(str(e))
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from e
         info["scope"] = s.name
         removed.append(info)
         log.success(f"Uninstalled {bridge_name} ({s.name})")
@@ -404,12 +410,18 @@ def plugin_uninstall(
     else:
         log.info("")
         log.info("[bold yellow]Next steps (required):[/bold yellow]")
-        log.info("  If the uninstalled bridges were previously installed inside Codex, "
-                 "Codex's enabled state and cache still remain.")
-        log.info("  Open Codex, run [bold]/plugins[/bold], and uninstall each bridge once there, "
-                 "or clean up manually:")
+        log.info(
+            "  If the uninstalled bridges were previously installed inside Codex, "
+            "Codex's enabled state and cache still remain."
+        )
+        log.info(
+            "  Open Codex, run [bold]/plugins[/bold], and uninstall each bridge once there, "
+            "or clean up manually:"
+        )
         log.info("    rm -rf ~/.codex/plugins/cache/cc-bridged-plugins/<bridge-name>")
-        log.info("    # Edit ~/.codex/config.toml and remove [plugins.\"<bridge-name>@cc-bridged-plugins\"]")
+        log.info(
+            '    # Edit ~/.codex/config.toml and remove [plugins."<bridge-name>@cc-bridged-plugins"]'
+        )
 
 
 @app.command("plugin-update")
@@ -469,7 +481,7 @@ def plugin_update(
             picked = prompt_select_bridges(available=available, strict=strict, action="update")
         except StrictModeError as e:
             log.error(str(e))
-            raise typer.Exit(code=2)
+            raise typer.Exit(code=2) from e
         picked_set = set(picked)
         for s, bridges in scope_bridges:
             for b in bridges:
@@ -502,7 +514,9 @@ def plugin_update(
                 scope=s,
                 force=force,
             )
-            updated.append({"bridgeName": result.bridge_name, "commit": resolved.commit, "scope": s.name})
+            updated.append(
+                {"bridgeName": result.bridge_name, "commit": resolved.commit, "scope": s.name}
+            )
             log.success(f"Updated {result.bridge_name} ({s.name}) → {resolved.commit[:7]}")
         finally:
             cleanup_source(resolved)
@@ -512,8 +526,10 @@ def plugin_update(
     else:
         log.info("")
         log.info("[bold yellow]Next steps (required):[/bold yellow]")
-        log.info("  Restart Codex, run [bold]/plugins[/bold], and re-install each bridge "
-                 "so Codex picks up the latest files.")
+        log.info(
+            "  Restart Codex, run [bold]/plugins[/bold], and re-install each bridge "
+            "so Codex picks up the latest files."
+        )
 
 
 if __name__ == "__main__":

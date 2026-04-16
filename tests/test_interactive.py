@@ -1,4 +1,5 @@
 """Tests for interactive prompt wrappers and non-interactive fallback."""
+
 from __future__ import annotations
 
 import pytest
@@ -84,6 +85,7 @@ def test_prompt_source_kind_scan_with_single_marketplace_returns_path(
                 @staticmethod
                 def ask():
                     return "Scan ~/.claude/plugins/marketplaces/"
+
             return _Q()
 
     monkeypatch.setitem(__import__("sys").modules, "questionary", _FakeQuestionary)
@@ -103,6 +105,7 @@ def test_prompt_source_kind_scan_empty_raises(tmp_path, monkeypatch) -> None:
                 @staticmethod
                 def ask():
                     return "Scan ~/.claude/plugins/marketplaces/"
+
             return _Q()
 
     monkeypatch.setitem(__import__("sys").modules, "questionary", _FakeQuestionary)

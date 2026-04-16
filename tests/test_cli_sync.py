@@ -1,4 +1,5 @@
 """E2E tests for plugin-sync."""
+
 from __future__ import annotations
 
 import json
@@ -17,16 +18,22 @@ def test_sync_local_to_global_with_all_plugins(fake_home: Path) -> None:
         app,
         [
             "plugin-sync",
-            "--source", str(FIXTURE_DIR),
-            "--scope", "global",
+            "--source",
+            str(FIXTURE_DIR),
+            "--scope",
+            "global",
             "--all-plugins",
             "--non-interactive",
             "--yes",
         ],
     )
     assert result.exit_code == 0, result.stdout + (result.stderr or "")
-    assert (fake_home / ".codex" / "plugins" / "cc-demo-a" / ".codex-plugin" / "plugin.json").exists()
-    assert (fake_home / ".codex" / "plugins" / "cc-demo-b" / ".codex-plugin" / "plugin.json").exists()
+    assert (
+        fake_home / ".codex" / "plugins" / "cc-demo-a" / ".codex-plugin" / "plugin.json"
+    ).exists()
+    assert (
+        fake_home / ".codex" / "plugins" / "cc-demo-b" / ".codex-plugin" / "plugin.json"
+    ).exists()
     assert (fake_home / ".codex" / "agents" / "cc_demo_a_helper.toml").exists()
     reg = json.loads((fake_home / ".agents" / "plugins" / "marketplace.json").read_text())
     names = sorted(p["name"] for p in reg["plugins"])
@@ -38,9 +45,12 @@ def test_sync_specific_plugin(fake_home: Path) -> None:
         app,
         [
             "plugin-sync",
-            "--source", str(FIXTURE_DIR),
-            "--scope", "global",
-            "--plugin", "demo-a",
+            "--source",
+            str(FIXTURE_DIR),
+            "--scope",
+            "global",
+            "--plugin",
+            "demo-a",
             "--non-interactive",
             "--yes",
         ],
@@ -55,8 +65,10 @@ def test_sync_unknown_plugin_errors(fake_home: Path) -> None:
         app,
         [
             "plugin-sync",
-            "--source", str(FIXTURE_DIR),
-            "--plugin", "does-not-exist",
+            "--source",
+            str(FIXTURE_DIR),
+            "--plugin",
+            "does-not-exist",
             "--non-interactive",
             "--yes",
         ],
@@ -72,8 +84,10 @@ def test_sync_without_scope_flag_strict_errors(fake_home: Path) -> None:
         app,
         [
             "plugin-sync",
-            "--source", str(FIXTURE_DIR),
-            "--plugin", "demo-a",
+            "--source",
+            str(FIXTURE_DIR),
+            "--plugin",
+            "demo-a",
             "--non-interactive",
             "--yes",
         ],
@@ -88,8 +102,10 @@ def test_sync_json_output(fake_home: Path) -> None:
         app,
         [
             "plugin-sync",
-            "--source", str(FIXTURE_DIR),
-            "--scope", "global",
+            "--source",
+            str(FIXTURE_DIR),
+            "--scope",
+            "global",
             "--all-plugins",
             "--json",
             "--yes",

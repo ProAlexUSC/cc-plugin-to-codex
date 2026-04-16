@@ -1,4 +1,5 @@
 """Tests for target marketplace.json registry upsert/remove."""
+
 from __future__ import annotations
 
 import json
@@ -6,9 +7,9 @@ from pathlib import Path
 
 from cc_plugin_to_codex.registry import (
     load_or_init_registry,
-    upsert_plugin_entry,
     remove_plugin_entry,
     save_registry,
+    upsert_plugin_entry,
 )
 
 
@@ -46,7 +47,9 @@ def test_upsert_adds_new_entry() -> None:
 def test_upsert_replaces_existing_entry() -> None:
     reg = {
         "name": "x",
-        "plugins": [{"name": "cc-ios-dev", "source": {"path": "old"}, "policy": {}, "category": "X"}],
+        "plugins": [
+            {"name": "cc-ios-dev", "source": {"path": "old"}, "policy": {}, "category": "X"}
+        ],
     }
     upsert_plugin_entry(reg, name="cc-ios-dev", relative_path="./new")
     assert len(reg["plugins"]) == 1

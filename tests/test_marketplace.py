@@ -1,4 +1,5 @@
 """Tests for reading source marketplace.json."""
+
 from __future__ import annotations
 
 import json
@@ -6,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from cc_plugin_to_codex.marketplace import PluginInfo, read_source_marketplace
+from cc_plugin_to_codex.marketplace import read_source_marketplace
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "src_marketplace"
 

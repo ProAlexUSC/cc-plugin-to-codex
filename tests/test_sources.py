@@ -1,4 +1,5 @@
 """Tests for source resolution: git URL, local path, scan local marketplaces."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,7 +8,6 @@ import pytest
 
 from cc_plugin_to_codex.sources import (
     GIT_SHA_RE,
-    ResolvedSource,
     classify_source,
     resolve_local,
     scan_local_marketplaces,

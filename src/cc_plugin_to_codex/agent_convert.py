@@ -1,4 +1,5 @@
 """Convert CC agent markdown (YAML frontmatter + body) to Codex agent TOML."""
+
 from __future__ import annotations
 
 import re
@@ -66,7 +67,9 @@ def convert_agent(
         if key in _DROPPED_FIELDS:
             warnings.append(ConversionWarning(field=key, reason="Not compatible with Codex"))
         else:
-            warnings.append(ConversionWarning(field=key, reason="Unknown frontmatter field, dropped"))
+            warnings.append(
+                ConversionWarning(field=key, reason="Unknown frontmatter field, dropped")
+            )
 
     agent_name = f"cc_{snake_case_name(source_plugin)}_{snake_case_name(source_agent)}"
 

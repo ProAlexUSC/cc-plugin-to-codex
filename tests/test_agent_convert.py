@@ -1,4 +1,5 @@
 """Tests for CC agent md → Codex TOML conversion."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -6,7 +7,6 @@ from pathlib import Path
 import pytest
 
 from cc_plugin_to_codex.agent_convert import (
-    ConversionWarning,
     convert_agent,
     snake_case_name,
 )
@@ -30,10 +30,12 @@ You are a helpful assistant. Do helpful things.
 """,
         encoding="utf-8",
     )
-    result = convert_agent(md, bridge_plugin="cc-ios-dev", source_plugin="ios-dev", synced_at="2026-04-14T10:30:00Z")
+    result = convert_agent(
+        md, bridge_plugin="cc-ios-dev", source_plugin="ios-dev", synced_at="2026-04-14T10:30:00Z"
+    )
     assert result.agent_name == "cc_ios_dev_helper"
-    assert "name = \"cc_ios_dev_helper\"" in result.toml
-    assert "description = \"A helpful agent\"" in result.toml
+    assert 'name = "cc_ios_dev_helper"' in result.toml
+    assert 'description = "A helpful agent"' in result.toml
     assert "You are a helpful assistant" in result.toml
     assert result.toml.startswith("# x-cc-bridge: ")
     # warnings empty for clean input
@@ -54,8 +56,12 @@ body
 """,
         encoding="utf-8",
     )
-    result = convert_agent(md, bridge_plugin="cc-ios-dev", source_plugin="ios-dev", synced_at="2026-04-14T10:30:00Z")
-    assert "model" not in result.toml.lower().replace("model_reasoning", "")  # no top-level model key
+    result = convert_agent(
+        md, bridge_plugin="cc-ios-dev", source_plugin="ios-dev", synced_at="2026-04-14T10:30:00Z"
+    )
+    assert "model" not in result.toml.lower().replace(
+        "model_reasoning", ""
+    )  # no top-level model key
     assert "tools" not in result.toml.lower()
     warnings_text = " ".join(w.field for w in result.warnings)
     assert "model" in warnings_text
@@ -73,7 +79,9 @@ body
 """,
         encoding="utf-8",
     )
-    result = convert_agent(md, bridge_plugin="cc-ios-dev", source_plugin="ios-dev", synced_at="2026-04-14T10:30:00Z")
+    result = convert_agent(
+        md, bridge_plugin="cc-ios-dev", source_plugin="ios-dev", synced_at="2026-04-14T10:30:00Z"
+    )
     assert "Bridged from CC plugin ios-dev" in result.toml
 
 
@@ -109,7 +117,8 @@ def test_convert_agent_triple_quote_body_safe(tmp_path: Path) -> None:
     result = convert_agent(md, bridge_plugin="cc-ios-dev", source_plugin="ios-dev", synced_at="x")
     # loading the TOML back should succeed
     import tomllib
+
     # strip marker comment line for parsing
     toml_body = "\n".join(result.toml.splitlines()[1:])
     parsed = tomllib.loads(toml_body)
-    assert 'triple' in parsed["developer_instructions"]
+    assert "triple" in parsed["developer_instructions"]

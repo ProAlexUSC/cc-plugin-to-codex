@@ -1,4 +1,5 @@
 """Console output helpers. Supports text and JSON modes."""
+
 from __future__ import annotations
 
 import json
