@@ -1,3 +1,7 @@
+# Skip the bare-git test fixture: its contents are produced by git itself
+# and its byte-layout must not be touched by lint/whitespace hooks.
+exclude: '^tests/fixtures/bare-marketplace\.git/'
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

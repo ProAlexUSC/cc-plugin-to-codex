@@ -13,7 +13,7 @@ from typing import Literal
 
 SourceKind = Literal["git", "local"]
 
-GIT_URL_RE = re.compile(r"^(git@|https?://|ssh://|git://).+\.git$|^git@.+:.+$")
+GIT_URL_RE = re.compile(r"^(git@|https?://|ssh://|git://|file://).+\.git/?$|^git@.+:.+$")
 # A plausible git SHA: 7–40 hex chars, all lowercase (git rev-parse output convention).
 GIT_SHA_RE = re.compile(r"^[0-9a-f]{7,40}$")
 
