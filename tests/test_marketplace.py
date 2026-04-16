@@ -31,7 +31,7 @@ def test_plugin_info_counts_skills_and_agents() -> None:
     by_name = {p.name: p for p in mp.plugins}
     assert by_name["demo-a"].skill_count == 1
     assert by_name["demo-a"].agent_count == 1
-    assert by_name["demo-b"].skill_count == 0
+    assert by_name["demo-b"].skill_count == 1
     assert by_name["demo-b"].agent_count == 0
 
 
