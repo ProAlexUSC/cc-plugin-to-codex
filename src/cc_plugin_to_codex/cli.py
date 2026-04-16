@@ -52,8 +52,7 @@ def _root(
         is_eager=True,
         help="Show the installed version and exit.",
     ),
-) -> None:
-    """Root callback that registers --version before any subcommand runs."""
+) -> None: ...
 
 
 # Shared option descriptions reused across commands for consistent wording.

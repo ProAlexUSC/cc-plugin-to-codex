@@ -16,36 +16,24 @@ from cc_plugin_to_codex.sources import (
 )
 
 
-def test_classify_source_git_ssh() -> None:
-    assert classify_source("git@code.byted.org:luna/cc-marketplace.git") == "git"
-
-
-def test_classify_source_git_https() -> None:
-    assert classify_source("https://github.com/foo/bar.git") == "git"
-
-
-def test_classify_source_local_absolute() -> None:
-    assert classify_source("/Users/me/workspace/cc-marketplace") == "local"
-
-
-def test_classify_source_local_home() -> None:
-    assert classify_source("~/.claude/plugins/marketplaces/foo") == "local"
-
-
-def test_classify_source_file_url_with_git_suffix() -> None:
-    assert classify_source("file:///tmp/repo.git") == "git"
-
-
-def test_classify_source_file_url_without_git_suffix() -> None:
-    """file:// is strong enough evidence on its own — real local checkouts
-    frequently don't carry a .git suffix."""
-    assert classify_source("file:///Users/me/my-repo") == "git"
-
-
-def test_classify_source_network_url_without_git_suffix_is_local() -> None:
-    """Non-file network schemes still require .git — avoids misclassifying
-    a typo'd https URL as a git source we can't actually clone."""
-    assert classify_source("https://example.com/foo") == "local"
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        # Network schemes with .git suffix — classified as git
+        ("git@code.byted.org:luna/cc-marketplace.git", "git"),
+        ("https://github.com/foo/bar.git", "git"),
+        # file:// accepts any path — real local checkouts often lack .git suffix
+        ("file:///tmp/repo.git", "git"),
+        ("file:///Users/me/my-repo", "git"),
+        # Filesystem paths and typo'd network URLs fall back to local
+        ("/Users/me/workspace/cc-marketplace", "local"),
+        ("~/.claude/plugins/marketplaces/foo", "local"),
+        # Non-file network schemes require .git to guard against typos
+        ("https://example.com/foo", "local"),
+    ],
+)
+def test_classify_source(source: str, expected: str) -> None:
+    assert classify_source(source) == expected
 
 
 def test_resolve_local_expands_home(tmp_path: Path, monkeypatch) -> None:
