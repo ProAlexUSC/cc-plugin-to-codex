@@ -4,5 +4,3 @@
 	bare = true
 	ignorecase = true
 	precomposeunicode = true
-[remote "origin"]
-	url = /Users/bytedance/Desktop/Project/cc-plugin-to-codex/tests/fixtures/_bare_workdir

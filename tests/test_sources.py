@@ -20,7 +20,7 @@ from cc_plugin_to_codex.sources import (
     ("source", "expected"),
     [
         # Network schemes with .git suffix — classified as git
-        ("git@code.byted.org:luna/cc-marketplace.git", "git"),
+        ("git@github.com:acme/cc-marketplace.git", "git"),
         ("https://github.com/foo/bar.git", "git"),
         # file:// accepts any path — real local checkouts often lack .git suffix
         ("file:///tmp/repo.git", "git"),

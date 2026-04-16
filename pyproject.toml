@@ -60,9 +60,9 @@ include = ["src/cc_plugin_to_codex", "README.md", "LICENSE", "CHANGELOG.md", "py
 testpaths = ["tests"]
 
 # Pin the index to public PyPI so `uv lock` produces a lockfile that
-# CI and external contributors can resolve. Without this, a local user
-# config pointing at an internal mirror (e.g. bytedpypi) would bake
-# unreachable URLs into uv.lock.
+# CI and external contributors can resolve. Without this, a developer's
+# local user config pointing at an internal mirror would bake unreachable
+# URLs into uv.lock.
 [[tool.uv.index]]
 url = "https://pypi.org/simple"
 default = true

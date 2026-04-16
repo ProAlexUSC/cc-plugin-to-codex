@@ -15,7 +15,7 @@ from cc_plugin_to_codex.bridge import (
 def test_build_marker_has_required_fields() -> None:
     marker = build_marker(
         source_plugin="ios-dev",
-        source="git@code.byted.org:luna/cc-marketplace.git",
+        source="git@github.com:acme/cc-marketplace.git",
         source_kind="git",
         ref="master",
         commit="abc123",
@@ -23,7 +23,7 @@ def test_build_marker_has_required_fields() -> None:
         agents=["cc_ios_dev_helper"],
     )
     assert marker["sourcePlugin"] == "ios-dev"
-    assert marker["source"] == "git@code.byted.org:luna/cc-marketplace.git"
+    assert marker["source"] == "git@github.com:acme/cc-marketplace.git"
     assert marker["sourceKind"] == "git"
     assert marker["ref"] == "master"
     assert marker["commit"] == "abc123"

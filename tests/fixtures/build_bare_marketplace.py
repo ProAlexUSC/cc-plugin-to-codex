@@ -49,6 +49,15 @@ def main() -> None:
         check=True,
     )
 
+    # git clone --bare writes the source path into [remote "origin"].url;
+    # that path is both meaningless (the workdir gets rmtree'd) and leaks
+    # the build machine's filesystem layout into a committed fixture.
+    # Remove the remote so the bare repo is self-contained.
+    subprocess.run(
+        ["git", "-C", str(BARE), "remote", "remove", "origin"],
+        check=True,
+    )
+
     # The outer git strips empty directories on checkout, so drop the
     # unpacked refs/heads and refs/tags subdirs (packed-refs already
     # carries every ref) and leave a single refs/.gitkeep so the bare
