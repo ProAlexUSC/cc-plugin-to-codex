@@ -9,10 +9,12 @@ updates:
     groups:
       python-dev-deps:
         patterns:
-          - "ruff"
-          - "mypy"
-          - "pre-commit"
+          - "ruff*"
+          - "mypy*"
+          - "pre-commit*"
           - "pytest*"
+          - "types-*"
+          - "coverage*"
 
   - package-ecosystem: "github-actions"
     directory: "/"

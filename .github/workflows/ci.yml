@@ -52,10 +52,15 @@ jobs:
       - name: Run tests with coverage
         run: uv run pytest -v --cov=cc_plugin_to_codex --cov-report=xml --cov-report=term-missing --cov-fail-under=85
 
+      # Per-file floors run even if the overall --cov-fail-under gate failed,
+      # so a single CI run reports every coverage regression at once instead
+      # of stopping at the first one.
       - name: Per-file coverage floor — interactive.py >= 90
+        if: always()
         run: uv run coverage report --include="src/cc_plugin_to_codex/interactive.py" --fail-under=90
 
       - name: Per-file coverage floor — sources.py >= 85
+        if: always()
         run: uv run coverage report --include="src/cc_plugin_to_codex/sources.py" --fail-under=85
 
       - name: Upload coverage to Codecov

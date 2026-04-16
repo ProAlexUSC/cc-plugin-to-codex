@@ -16,9 +16,15 @@ if [[ ! -d "$fixture" ]]; then
     exit 1
 fi
 
+if ! command -v uv >/dev/null 2>&1; then
+    echo "uv not found in PATH; install via https://docs.astral.sh/uv/"
+    exit 1
+fi
+
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 
+echo "==> uv       : $(uv --version)"
 echo "==> smoke HOME: $tmpdir"
 echo "==> source    : file://$fixture"
 
