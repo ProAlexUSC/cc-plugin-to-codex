@@ -13,7 +13,12 @@ from typing import Literal
 
 SourceKind = Literal["git", "local"]
 
-GIT_URL_RE = re.compile(r"^(git@|https?://|ssh://|git://|file://).+\.git/?$|^git@.+:.+$")
+# Git URL matching. Network schemes (git@, https, ssh, git) require the .git
+# suffix — real remotes always carry it and anything without is more likely a
+# typo. The file:// scheme is relaxed: local git repos frequently live in plain
+# directories without a .git suffix (e.g. file:///path/to/checkout), and the
+# file:// prefix is already strong evidence the user means "treat as git".
+GIT_URL_RE = re.compile(r"^(git@|https?://|ssh://|git://).+\.git/?$|^git@.+:.+$|^file://.+")
 # A plausible git SHA: 7–40 hex chars, all lowercase (git rev-parse output convention).
 GIT_SHA_RE = re.compile(r"^[0-9a-f]{7,40}$")
 

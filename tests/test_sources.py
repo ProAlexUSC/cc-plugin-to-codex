@@ -32,6 +32,22 @@ def test_classify_source_local_home() -> None:
     assert classify_source("~/.claude/plugins/marketplaces/foo") == "local"
 
 
+def test_classify_source_file_url_with_git_suffix() -> None:
+    assert classify_source("file:///tmp/repo.git") == "git"
+
+
+def test_classify_source_file_url_without_git_suffix() -> None:
+    """file:// is strong enough evidence on its own — real local checkouts
+    frequently don't carry a .git suffix."""
+    assert classify_source("file:///Users/me/my-repo") == "git"
+
+
+def test_classify_source_network_url_without_git_suffix_is_local() -> None:
+    """Non-file network schemes still require .git — avoids misclassifying
+    a typo'd https URL as a git source we can't actually clone."""
+    assert classify_source("https://example.com/foo") == "local"
+
+
 def test_resolve_local_expands_home(tmp_path: Path, monkeypatch) -> None:
     # Path.expanduser() reads $HOME via os.path.expanduser, so both must be set.
     monkeypatch.setenv("HOME", str(tmp_path))
