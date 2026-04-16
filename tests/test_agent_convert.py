@@ -122,3 +122,41 @@ def test_convert_agent_triple_quote_body_safe(tmp_path: Path) -> None:
     toml_body = "\n".join(result.toml.splitlines()[1:])
     parsed = tomllib.loads(toml_body)
     assert "triple" in parsed["developer_instructions"]
+
+
+def test_convert_agent_non_dict_frontmatter_raises(tmp_path: Path) -> None:
+    """Frontmatter that is a YAML list (not a mapping) must raise ValueError."""
+    md = tmp_path / "list.md"
+    md.write_text("---\n- item1\n- item2\n---\nbody\n")
+    with pytest.raises(ValueError, match="must be a YAML mapping"):
+        convert_agent(md, bridge_plugin="cc-x", source_plugin="x", synced_at="t")
+
+
+def test_convert_agent_unknown_field_warns(tmp_path: Path) -> None:
+    """Unknown frontmatter fields must produce a ConversionWarning, not raise."""
+    md = tmp_path / "unknown.md"
+    md.write_text("---\nname: thing\ndescription: d\nweird_field: 42\n---\nbody\n")
+    result = convert_agent(md, bridge_plugin="cc-x", source_plugin="x", synced_at="t")
+    warning_fields = [w.field for w in result.warnings]
+    assert "weird_field" in warning_fields
+
+
+def test_convert_agent_dropped_field_warns(tmp_path: Path) -> None:
+    """Explicitly dropped fields (model, tools) must produce a ConversionWarning."""
+    md = tmp_path / "dropped.md"
+    md.write_text("---\nname: thing\ndescription: d\nmodel: gpt-4\ntools: [bash]\n---\nbody\n")
+    result = convert_agent(md, bridge_plugin="cc-x", source_plugin="x", synced_at="t")
+    fields = [w.field for w in result.warnings]
+    assert "model" in fields
+    assert "tools" in fields
+
+
+def test_convert_agent_passthrough_nickname_candidates(tmp_path: Path) -> None:
+    """nickname_candidates must be passed through to the TOML output."""
+    md = tmp_path / "nicks.md"
+    md.write_text(
+        '---\nname: thing\ndescription: d\nnickname_candidates: ["foo", "bar"]\n---\nbody\n'
+    )
+    result = convert_agent(md, bridge_plugin="cc-x", source_plugin="x", synced_at="t")
+    assert "nickname_candidates" in result.toml
+    assert "foo" in result.toml

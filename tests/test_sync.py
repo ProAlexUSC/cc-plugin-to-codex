@@ -387,3 +387,64 @@ def test_sync_one_preserves_user_authored_toml_during_stale_cleanup(
         scope=scope,
     )
     assert user_toml.exists(), "user-authored TOML must never be deleted by stale cleanup"
+
+
+def test_atomic_replace_rollback_on_rename_failure(fake_home: Path, monkeypatch) -> None:
+    """If staged.rename(target) fails after the old dir was moved aside,
+    the rollback must restore the original target and stage_dir is removed."""
+    scope = resolve_scope("global")
+    scope.ensure_dirs()
+    info, mp = _get_plugin_info("demo-a")
+
+    # First sync to populate target
+    sync_plugin(
+        info=info,
+        marketplace_name=mp.name,
+        source="s",
+        source_kind="local",
+        ref=None,
+        commit="local",
+        scope=scope,
+    )
+    bridge_dir = scope.plugins_dir / "cc-demo-a"
+    original_manifest_text = (bridge_dir / ".codex-plugin" / "plugin.json").read_text()
+
+    # Patch Path.rename so the SECOND call (staged.rename(target)) fails.
+    # First call (target -> old_dir) succeeds; second call raises.
+    real_rename = Path.rename
+    state = {"calls": 0}
+
+    def _flaky_rename(self, target):
+        state["calls"] += 1
+        if state["calls"] == 2:
+            raise OSError("simulated rename failure")
+        return real_rename(self, target)
+
+    monkeypatch.setattr(Path, "rename", _flaky_rename)
+
+    with pytest.raises(OSError, match="simulated rename failure"):
+        sync_plugin(
+            info=info,
+            marketplace_name=mp.name,
+            source="s",
+            source_kind="local",
+            ref=None,
+            commit="local",
+            scope=scope,
+        )
+
+    # Restore real rename so post-checks work
+    monkeypatch.setattr(Path, "rename", real_rename)
+
+    # Original target must be restored by the rollback
+    assert bridge_dir.exists(), "original bridge dir must be restored after failed rename"
+    restored_text = (bridge_dir / ".codex-plugin" / "plugin.json").read_text()
+    assert restored_text == original_manifest_text
+
+    # No leftover stage- or .old- dirs in the parent
+    siblings = [
+        p
+        for p in scope.plugins_dir.iterdir()
+        if p.name.startswith(".cc-demo-a.stage-") or p.name.startswith(".cc-demo-a.old-")
+    ]
+    assert siblings == [], f"orphan dirs left behind: {siblings}"
