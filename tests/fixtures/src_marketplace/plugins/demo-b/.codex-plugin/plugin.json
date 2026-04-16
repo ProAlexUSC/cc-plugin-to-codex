@@ -1,0 +1,6 @@
+{
+  "name": "demo-b",
+  "version": "2.0.0",
+  "description": "Demo plugin B (codex variant)",
+  "skills": "./skills/"
+}

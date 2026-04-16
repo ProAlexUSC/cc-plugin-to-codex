@@ -1,0 +1,8 @@
+{
+  "name": "demo-a",
+  "version": "1.0.0",
+  "description": "Demo plugin A",
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "hooks": {"SessionStart": "./hooks/start.sh"}
+}
