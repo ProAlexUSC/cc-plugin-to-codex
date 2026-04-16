@@ -15,7 +15,10 @@ repos:
         args: ["--maxkb=500"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
+    # Keep in lockstep with the ruff version resolved in uv.lock, otherwise
+    # pre-commit and CI `uv run ruff format --check` produce divergent
+    # formatting output and fight each other.
+    rev: v0.15.7
     hooks:
       - id: ruff
         args: ["--fix"]

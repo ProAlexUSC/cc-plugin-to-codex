@@ -66,15 +66,15 @@ def test_e2e_sync_from_bare_git_produces_valid_codex_tomls(fake_home: Path) -> N
             f"{toml_path.name}: missing required Codex fields {missing}; "
             f"see docs/codex-spec/codex-subagents.md"
         )
-        assert (
-            isinstance(parsed["name"], str) and parsed["name"]
-        ), f"{toml_path.name}: name must be non-empty string"
-        assert (
-            isinstance(parsed["description"], str) and parsed["description"]
-        ), f"{toml_path.name}: description must be non-empty string"
-        assert isinstance(
-            parsed["developer_instructions"], str
-        ), f"{toml_path.name}: developer_instructions must be string"
+        assert isinstance(parsed["name"], str) and parsed["name"], (
+            f"{toml_path.name}: name must be non-empty string"
+        )
+        assert isinstance(parsed["description"], str) and parsed["description"], (
+            f"{toml_path.name}: description must be non-empty string"
+        )
+        assert isinstance(parsed["developer_instructions"], str), (
+            f"{toml_path.name}: developer_instructions must be string"
+        )
 
     plugins_dir = fake_home / ".codex" / "plugins"
     assert plugins_dir.is_dir()

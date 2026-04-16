@@ -108,9 +108,9 @@ def test_extract_marker_returns_none_when_required_field_missing() -> None:
     ):
         marker = _full_marker()
         marker.pop(missing)
-        assert (
-            extract_marker({"x-cc-bridge": marker}) is None
-        ), f"extract_marker must reject marker missing {missing!r}"
+        assert extract_marker({"x-cc-bridge": marker}) is None, (
+            f"extract_marker must reject marker missing {missing!r}"
+        )
 
 
 def test_extract_marker_accepts_ref_none() -> None:
